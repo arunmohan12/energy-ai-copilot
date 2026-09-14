@@ -1,0 +1,16 @@
+{
+  "customer_name": "John Smith",
+  "billing_period_start": "2026-08-01",
+  "billing_period_end": "2026-08-31",
+  "due_date": "2026-09-15",
+  "electricity_meter_number": "MTR-784512",
+  "previous_meter_reading": "18420",
+  "current_meter_reading": "19671",
+  "energy_consumption": "1251",
+  "electricity_charges": "218.5",
+  "water_charges": "42",
+  "service_charges": "15",
+  "vat": "13.78",
+  "total_amount": "289.28",
+  "payment_status": "UNPAID"
+}
