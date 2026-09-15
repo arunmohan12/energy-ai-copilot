@@ -9,7 +9,7 @@ from sqlalchemy import text
 from app.dependencies import get_db
 from app.models.energy_bill import EnergyBill
 from app.schemas.energy_bill import EnergyBillCreate, EnergyBillResponse
-
+from app.services.bill_processing import process_bill_extraction
 app = FastAPI(title="EnergyAI Copilot")
 @app.get("/")
 def home():
@@ -98,4 +98,19 @@ async def upload_bill(file : UploadFile = File(...),db: Session = Depends(get_db
         "file_path": new_bill.file_path,
         "content_type": new_bill.content_type,
         "status": new_bill.status,
+    }
+
+@app.post("/api/bills/{bill_id}/process")
+def process_bill_api(bill_id: int, db: Session = Depends(get_db)):
+    bill = db.get(EnergyBill,bill_id)
+    if bill is None:
+        raise HTTPException(status_code=404, detail="Bill not found")
+    processed_bill= process_bill_extraction(db,bill)
+
+    return {
+        "bill_id": processed_bill.id,
+        "status": processed_bill.status,
+        "customer_name": processed_bill.customer_name,
+        "energy_consumption": processed_bill.energy_consumption,
+        "total_amount": processed_bill.total_amount,
     }

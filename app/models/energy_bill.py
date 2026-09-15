@@ -27,15 +27,62 @@ class EnergyBill(Base):
         nullable=True,
     )
 
-    total_amount: Mapped[Decimal | None] = mapped_column(
-        Numeric(10, 2),
+    due_date: Mapped[date| None] = mapped_column(
+        Date,
         nullable=True,
+    )
+
+    electricity_meter_number: Mapped [str | None] = mapped_column(
+        String(255),
+        nullable=True,
+    )
+
+    previous_meter_reading: Mapped [Decimal | None] = mapped_column(
+        Numeric(12, 3),
+        nullable=True,
+    )
+
+    current_meter_reading: Mapped [Decimal | None] = mapped_column(
+        Numeric(12, 3),
+        nullable=True
     )
 
     energy_consumption: Mapped[Decimal | None] = mapped_column(
         Numeric(12, 3),
         nullable=True,
     )
+
+    electricity_charges: Mapped [Decimal | None] = mapped_column(
+        Numeric(10, 2),
+        nullable=True
+    )
+
+
+    water_charges: Mapped [Decimal | None] = mapped_column(
+        Numeric(10,2),
+        nullable=True
+    )
+
+    service_charges: Mapped [Decimal | None] = mapped_column(
+        Numeric(10,2),
+        nullable=True
+    )
+
+    vat: Mapped[Decimal | None] = mapped_column(
+        Numeric(10,2),
+        nullable=True,
+    )
+
+    total_amount: Mapped[Decimal | None] = mapped_column(
+        Numeric(10, 2),
+        nullable=True,
+    )
+
+    payment_status: Mapped[str | None] = mapped_column(
+        String(50),
+        nullable=True,
+    )
+
 
     original_filename: Mapped[str | None] = mapped_column(
         String(255),
