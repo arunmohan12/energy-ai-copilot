@@ -21,6 +21,7 @@ class EnergyBillResponse(BaseModel):
     billing_period_end: date | None = None
     total_amount: Decimal | None = None
     energy_consumption: Decimal | None = None
+    status: str
 
     model_config = {
         "from_attributes": True
