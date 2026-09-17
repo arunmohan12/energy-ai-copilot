@@ -1,5 +1,6 @@
 from sqlalchemy.orm import Session
 
+from app.models.customer import Customer
 from app.models.energy_bill import EnergyBill
 from app.schemas.bill_extraction import EnergyBillExtraction
 
@@ -32,8 +33,10 @@ def save_bill_extraction(
 
 def update_bill_extraction(db: Session,
         extraction: EnergyBillExtraction,
-        bill: EnergyBill)-> EnergyBill:
+        bill: EnergyBill,customer: Customer)-> EnergyBill:
     bill.customer_name = extraction.customer_name
+    bill.customer_id =customer.id
+
     bill.billing_period_start = extraction.billing_period_start
     bill.billing_period_end = extraction.billing_period_end
     bill.due_date = extraction.due_date

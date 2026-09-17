@@ -1,8 +1,8 @@
 from datetime import date
 from decimal import Decimal
 
-from sqlalchemy import Date, Integer, Numeric, String
-from sqlalchemy.orm import Mapped, mapped_column
+from sqlalchemy import Date, Integer, Numeric, String,ForeignKey
+from sqlalchemy.orm import Mapped, mapped_column, Relationship
 
 from app.database import Base
 
@@ -11,7 +11,11 @@ class EnergyBill(Base):
     __tablename__ = "energy_bills"
 
     id: Mapped[int] = mapped_column(Integer, primary_key=True)
-
+    customer_id: Mapped[int] = mapped_column(ForeignKey("customers.id"),nullable=True)
+    customer = Relationship(
+        "Customer",
+        back_populates="bills",
+    )
     customer_name: Mapped[str | None] = mapped_column(
         String(255),
         nullable=True,

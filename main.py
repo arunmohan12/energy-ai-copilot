@@ -9,8 +9,10 @@ from sqlalchemy import text
 from app.dependencies import get_db
 from app.models.energy_bill import EnergyBill
 from app.schemas.energy_bill import EnergyBillCreate, EnergyBillResponse
-from app.services.bill_processing import process_bill_extraction
+from app.messaging.bill_producer import publish_bill_processing_job, publish_bill_retry_job
+from app.api.copilot import router as copilot_router
 app = FastAPI(title="EnergyAI Copilot")
+app.include_router(copilot_router)
 @app.get("/")
 def home():
     return {     "message": "EnergyAI Copilot API is running"}
@@ -101,16 +103,54 @@ async def upload_bill(file : UploadFile = File(...),db: Session = Depends(get_db
     }
 
 @app.post("/api/bills/{bill_id}/process")
-def process_bill_api(bill_id: int, db: Session = Depends(get_db)):
-    bill = db.get(EnergyBill,bill_id)
+async def process_bill_api(
+    bill_id: int,
+    db: Session = Depends(get_db),
+):
+    bill = db.get(EnergyBill, bill_id)
+
     if bill is None:
-        raise HTTPException(status_code=404, detail="Bill not found")
-    processed_bill= process_bill_extraction(db,bill)
+        raise HTTPException(
+            status_code=404,
+            detail="Bill not found",
+        )
+
+    await publish_bill_processing_job(bill_id)
 
     return {
-        "bill_id": processed_bill.id,
-        "status": processed_bill.status,
-        "customer_name": processed_bill.customer_name,
-        "energy_consumption": processed_bill.energy_consumption,
-        "total_amount": processed_bill.total_amount,
+        "bill_id": bill.id,
+        "status": "queued",
+        "message": "Bill processing job published to RabbitMQ",
+    }
+
+@app.post("/api/bills/{bill_id}/retry")
+async def retry_failed_bill(
+    bill_id: int,
+    db: Session = Depends(get_db),
+):
+    bill = db.get(EnergyBill, bill_id)
+
+    if bill is None:
+        raise HTTPException(
+            status_code=404,
+            detail="Bill not found",
+        )
+
+    if bill.status != "failed":
+        raise HTTPException(
+            status_code=400,
+            detail="Only failed bills can be manually retried",
+        )
+
+    bill.status = "uploaded"
+
+    db.commit()
+    db.refresh(bill)
+
+    await publish_bill_retry_job(bill_id)
+
+    return {
+        "bill_id": bill.id,
+        "status": "queued",
+        "message": "Bill retry job published to RabbitMQ",
     }

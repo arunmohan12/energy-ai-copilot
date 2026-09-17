@@ -6,6 +6,7 @@ from pydantic import BaseModel
 
 class EnergyBillExtraction(BaseModel):
     customer_name: str | None = None
+    account_number: str | None = None
 
     billing_period_start: date | None = None
     billing_period_end: date | None = None

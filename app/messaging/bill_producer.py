@@ -54,3 +54,41 @@ async def publish_bill_processing_job(bill_id: int):
     )
 
     await connection.close()
+
+
+
+
+async def publish_bill_retry_job(bill_id: int):
+    connection, channel = await connect_rabbitmq()
+
+    exchange = await channel.declare_exchange(
+        EXCHANGE_NAME,
+        aio_pika.ExchangeType.DIRECT,
+        durable=True,
+    )
+
+    queue = await channel.declare_queue(
+        QUEUE_NAME,
+        durable=True,
+    )
+
+    await queue.bind(
+        exchange,
+        routing_key=ROUTING_KEY,
+    )
+
+    message = {
+        "bill_id": bill_id,
+        "retry_count": 0,
+    }
+
+    await exchange.publish(
+        aio_pika.Message(
+            body=json.dumps(message).encode(),
+            content_type="application/json",
+            delivery_mode=aio_pika.DeliveryMode.PERSISTENT,
+        ),
+        routing_key=ROUTING_KEY,
+    )
+
+    await connection.close()

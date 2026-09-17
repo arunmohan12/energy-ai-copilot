@@ -31,6 +31,12 @@ async def process_message(message, exchange):
             if bill is None:
                 print(f"Bill {bill_id} not found")
                 return
+            if bill.status == "validated":
+                print(
+                    f"Bill {bill_id} is already validated. "
+                    f"Skipping duplicate processing."
+                )
+                return
 
             bill.status = "processing"
             db.commit()
