@@ -135,3 +135,5 @@ def get_customer_latest_bill_for_copilot(
         "total_amount": bill.total_amount,
         "status": bill.status,
     }
+
+
